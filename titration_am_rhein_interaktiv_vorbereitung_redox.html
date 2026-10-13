@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Titration am Rhein – interaktives Chemielabor</title>
+<style>
+:root{--ink:#17324d;--muted:#587084;--blue:#1677a8;--blue2:#dff3fb;--teal:#087f8c;--green:#287a52;--gold:#f0b429;--red:#b83a3a;--paper:#f4f8fb;--card:#fff;--line:#d7e3eb;--shadow:0 8px 24px rgba(23,50,77,.08)}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{background:linear-gradient(120deg,#123d5a,#147a91);color:white;padding:30px 20px 26px}
+.wrap{max-width:1200px;margin:auto;padding:0 18px}
+.eyebrow{text-transform:uppercase;letter-spacing:.12em;font-size:.78rem;font-weight:800;opacity:.85}
+h1{font-size:clamp(2rem,4vw,3.2rem);line-height:1.08;margin:.4rem 0 .7rem}
+header p{max-width:800px;margin:.3rem 0 0;color:#e8f7fc}
+nav{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 22px}
+nav button,.btn{border:0;border-radius:10px;padding:10px 14px;font-weight:750;cursor:pointer;background:#e7f1f6;color:var(--ink);transition:.15s}
+nav button.active,nav button:hover,.btn.primary{background:var(--blue);color:white}
+.btn.secondary{background:#e4f4f5;color:#075b66}.btn.warning{background:#fff0d0;color:#704c00}.btn:disabled{opacity:.45;cursor:not-allowed}
+main{padding:24px 0 56px}.panel{display:none}.panel.active{display:block}
+h2{font-size:1.7rem;margin:.15rem 0 .4rem}h3{margin:.15rem 0 .5rem;font-size:1.15rem}
+.lead{color:var(--muted);max-width:850px;margin-top:0}
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow);min-width:0}
+.span-12{grid-column:span 12}.span-8{grid-column:span 8}.span-7{grid-column:span 7}.span-6{grid-column:span 6}.span-5{grid-column:span 5}.span-4{grid-column:span 4}
+.kicker{font-size:.78rem;text-transform:uppercase;letter-spacing:.09em;color:var(--teal);font-weight:850}
+.callout{border-left:4px solid var(--gold);padding:10px 14px;background:#fff8e7;border-radius:0 10px 10px 0}
+.equation{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:#edf5f8;padding:12px;border-radius:10px;overflow-wrap:anywhere}
+.pills{display:flex;gap:8px;flex-wrap:wrap}.pill{background:#eaf2f7;border-radius:99px;padding:4px 10px;font-size:.86rem;font-weight:700}
+.scene{background:linear-gradient(180deg,#dff4fa,#f5fbfd);border:1px solid #b9dfe9;border-radius:14px;padding:14px;overflow:hidden}
+.river{height:90px;border-radius:10px;background:linear-gradient(0deg,#7ec9e3,#d5f3fa);position:relative;overflow:hidden;margin:10px 0}
+.river:before,.river:after{content:"";position:absolute;width:130%;height:24px;border:3px solid rgba(255,255,255,.65);border-color:rgba(255,255,255,.75) transparent transparent transparent;border-radius:50%;left:-15%;top:25px;transform:rotate(-4deg)}
+.river:after{top:55px;left:-5%;transform:rotate(3deg)}
+.drop{position:absolute;right:12%;top:12px;width:18px;height:26px;background:#e3b74f;border-radius:60% 60% 60% 0;transform:rotate(-45deg);box-shadow:0 0 0 6px rgba(227,183,79,.16)}
+.indicator-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.swatch{display:flex;align-items:center;gap:8px;background:#f7fafc;border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.dot{width:22px;height:22px;border-radius:50%;border:1px solid #8aa2b1;display:inline-block}
+.lab{background:linear-gradient(180deg,#f6fbfd,#e7f1f6);border-radius:14px;padding:14px;border:1px solid var(--line)}
+.labgrid{display:grid;grid-template-columns:minmax(180px, .8fr) minmax(260px,1.2fr);gap:14px;align-items:stretch}
+.lab-art{min-height:330px;position:relative;background:linear-gradient(180deg,#eaf7fb,#fff);border-radius:12px;border:1px solid #d6e8ef;overflow:hidden}
+.shelf{position:absolute;left:7%;right:7%;top:22px;height:12px;background:#a7bac5;border-radius:5px}
+.burette{position:absolute;top:35px;left:45%;width:25px;height:155px;border:3px solid #7197a9;border-top:0;background:rgba(255,255,255,.72);border-radius:0 0 8px 8px;transform:translateX(-50%)}
+.burette-liquid{position:absolute;left:2px;right:2px;bottom:2px;height:75%;background:linear-gradient(90deg,#b8e7f4,#62b7d6);border-radius:0 0 5px 5px}
+.graduations{position:absolute;right:-22px;top:10px;color:#607d8c;font-size:10px;line-height:17px}
+.tap{position:absolute;top:187px;left:45%;width:50px;height:7px;background:#6f8e9c;transform:translateX(-50%);border-radius:5px}
+.tap:after{content:"";position:absolute;right:4px;top:-6px;width:6px;height:18px;background:#6f8e9c;border-radius:4px}
+.drip{position:absolute;left:45%;top:201px;width:7px;height:10px;background:#64bdd9;border-radius:60% 60% 60% 0;transform:rotate(-45deg);animation:drop 1.7s infinite;opacity:.7}
+@keyframes drop{0%{top:200px;opacity:0}20%{opacity:1}100%{top:230px;opacity:0}}
+.beaker{position:absolute;left:45%;bottom:38px;transform:translateX(-50%);width:145px;height:105px;border:4px solid #79a3b4;border-top:0;border-radius:0 0 20px 20px;background:rgba(255,255,255,.5);overflow:hidden}
+.beaker-liquid{position:absolute;bottom:0;left:0;right:0;height:72%;background:#f0e8a3;transition:background .25s}
+.beaker:before{content:"";position:absolute;top:0;left:-5px;right:-5px;height:8px;border:3px solid #79a3b4;border-radius:50%}
+.beaker-label{position:absolute;bottom:10px;left:0;right:0;text-align:center;font-size:.72rem;font-weight:800;color:#34566a}
+.ph-meter{position:absolute;left:12px;bottom:50px;background:#17324d;color:white;border-radius:8px;padding:9px 10px;font-weight:800;box-shadow:0 4px 8px #c3d6df}
+.ph-meter small{display:block;font-size:.65rem;color:#bfe7f3;font-weight:600}
+.electrode{position:absolute;left:52%;bottom:100px;width:5px;height:85px;background:#465b6a;border-radius:4px;transform:rotate(-12deg);transform-origin:bottom}
+.electrode:after{content:"";position:absolute;bottom:-6px;left:-3px;width:11px;height:12px;background:#6f9eaf;border-radius:4px}
+.lab-controls label{display:block;font-weight:750;margin:12px 0 4px}
+input[type=range]{width:100%;accent-color:var(--blue)}
+select{padding:9px;border:1px solid #bdced9;border-radius:8px;font:inherit;background:white;max-width:100%}
+.control-buttons{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.metric{background:#f0f7fa;border-radius:10px;padding:10px}.metric strong{display:block;font-size:1.25rem}
+table{width:100%;border-collapse:collapse;font-size:.9rem}th,td{text-align:left;padding:8px;border-bottom:1px solid var(--line)}th{background:#eff6f9;position:sticky;top:0}
+.table-scroll{max-height:270px;overflow:auto;border:1px solid var(--line);border-radius:10px}
+.graph-wrap{background:white;border:1px solid var(--line);border-radius:12px;padding:8px}
+svg{width:100%;height:auto;display:block}.graph-label{font-size:12px;fill:#38576b}
+.question{border:1px solid var(--line);border-radius:13px;padding:16px;margin:12px 0;background:white}
+.options{display:grid;gap:8px;margin:12px 0}
+.option{display:flex;gap:10px;align-items:flex-start;border:1px solid #d6e3ea;border-radius:10px;padding:10px;cursor:pointer}
+.option:hover{background:#f2f9fc}.option input{margin-top:5px;accent-color:var(--blue)}
+.feedback{display:none;margin-top:10px;padding:10px 12px;border-radius:9px}.feedback.show{display:block}.feedback.good{background:#e6f6ec;color:#185d38}.feedback.bad{background:#fff1e9;color:#853e22}
+.hint{color:#5a7283;font-size:.92rem;margin-top:8px}
+footer{background:#eaf2f6;color:#547083;padding:18px;text-align:center;font-size:.85rem}
+small.muted,.muted{color:var(--muted)}.status{font-weight:800;color:var(--teal)}
+@media(max-width:850px){.span-8,.span-7,.span-6,.span-5,.span-4{grid-column:span 12}.labgrid{grid-template-columns:1fr}.lab-art{min-height:330px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+ <div class="wrap">
+  <div class="eyebrow">Virtuelles Chemielabor · Gymnasium / Maturitätsniveau</div>
+  <h1>Titration am Rhein</h1>
+  <p>Ein Säureunfall, ein unbekanntes Wasserproben-Ergebnis und eine Methode, mit der du eine Konzentration bestimmst. Untersuche zuerst Indikatoren, führe dann eine Säure-Base-Titration durch und übertrage dein Verständnis auf die Vitamin-C-Redox-Titration.</p>
+  <div class="pills" style="margin-top:14px"><span class="pill">HCl + NaOH</span><span class="pill">pH-Kurve</span><span class="pill">Äquivalenzpunkt</span><span class="pill">6 Transferfragen</span></div>
+ </div>
+</header>
+<main class="wrap">
+<nav aria-label="Simulationsteile">
+ <button class="active" data-tab="intro">1 · Rhein & Indikator</button>
+ <button data-tab="lab">2 · Virtuelles Experiment</button>
+ <button data-tab="transfer">3 · Transfer zur Redox-Titration</button>
+</nav>
+
+<section class="panel active" id="intro">
+ <h2>1. Einsatz am Rhein: Wie sauer ist die Probe?</h2>
+ <p class="lead">Nach einem Unfall gelangt konzentrierte Salzsäure in den Rhein bei Basel. Du bist Teil des Analytikteams. Bevor du die Konzentration mit einer Titration bestimmst, machst du dich mit Indikatoren und dem Neutralisationsprinzip vertraut.</p>
+ <div class="grid">
+  <article class="card span-7">
+   <div class="kicker">Fallakte</div>
+   <div class="scene">
+    <h3>Wasserprobe aus dem Rhein</h3>
+    <div class="river" aria-label="Schematische Darstellung des Rheins"><span class="drop"></span></div>
+    <p>Die Probe reagiert sauer. Im Wasser liegt Salzsäure praktisch vollständig dissoziiert vor. Deine Aufgabe ist es, die Stoffmenge der Säure durch Zugabe einer Lösung bekannter Konzentration zu bestimmen.</p>
+   </div>
+   <div class="equation" style="margin-top:12px">HCl + H₂O → H₃O⁺ + Cl⁻</div>
+   <p class="muted">Bei der Titration reagiert Oxonium mit Hydroxid zu Wasser:</p>
+   <div class="equation">H₃O⁺ + OH⁻ → 2 H₂O</div>
+   <div class="callout" style="margin-top:14px"><strong>Dein Auftrag:</strong> Wähle einen passenden Indikator, beobachte den Farbumschlag und ermittle anschliessend mit der Titrationskurve den Äquivalenzpunkt.</div>
+  </article>
+  <article class="card span-5">
+   <div class="kicker">Mini-Labor · Indikator-Detektiv</div>
+   <h3>Welche Farbe erwartest du?</h3>
+   <p>Wähle einen pH-Wert. Die Farbanzeige ist schematisch und hilft dir, den Umschlagbereich einzuordnen.</p>
+   <label for="demoPH"><strong>pH-Wert: <span id="demoPHLabel">3.0</span></strong></label>
+   <input id="demoPH" type="range" min="1" max="13" step=".5" value="3">
+   <div style="display:flex;align-items:center;gap:12px;margin:14px 0">
+    <div id="demoSwatch" class="dot" style="width:52px;height:52px;background:#e6d76b"></div>
+    <div><strong id="demoColor">Gelb</strong><br><span class="muted" id="demoExplain">Die Lösung reagiert sauer.</span></div>
+   </div>
+   <div class="indicator-row">
+    <div class="swatch"><span class="dot" style="background:#e6d76b"></span><span><strong>Gelb</strong><br><small>deutlich sauer</small></span></div>
+    <div class="swatch"><span class="dot" style="background:#4ebd82"></span><span><strong>Grün</strong><br><small>nahe neutral</small></span></div>
+    <div class="swatch"><span class="dot" style="background:#2584d8"></span><span><strong>Blau</strong><br><small>alkalisch</small></span></div>
+   </div>
+   <p class="hint">Bromthymolblau (BTB) ist im sauren Bereich gelb, nahe pH 7 grün und im alkalischen Bereich blau. Der Umschlag ist allmählich, nicht sprunghaft.</p>
+   <button class="btn primary" id="goLab">Weiter zum Experiment →</button>
+  </article>
+  <article class="card span-12">
+   <h3>Vorhersage: Welcher Indikator passt?</h3>
+   <p>Bei einer Titration von Salzsäure mit Natronlauge liegt der Äquivalenzpunkt ungefähr bei pH 7. Welcher Indikator wäre deshalb grundsätzlich geeignet?</p>
+   <div class="options" id="indicatorChoices">
+    <label class="option"><input type="radio" name="indicatorChoice" value="a"><span><strong>Phenolphthalein</strong> – Umschlagbereich deutlich im alkalischen Bereich.</span></label>
+    <label class="option"><input type="radio" name="indicatorChoice" value="b"><span><strong>Bromthymolblau</strong> – Umschlagbereich um den neutralen pH-Bereich.</span></label>
+    <label class="option"><input type="radio" name="indicatorChoice" value="c"><span><strong>Ein beliebiger Indikator</strong> – der Umschlagbereich spielt keine Rolle.</span></label>
+   </div>
+   <button class="btn secondary" id="checkIndicator">Antwort prüfen</button>
+   <div class="feedback" id="indicatorFeedback" role="status"></div>
+  </article>
+ </div>
+</section>
+
+<section class="panel" id="lab">
+ <h2>2. Das Experiment: Salzsäure mit Natronlauge titrieren</h2>
+ <p class="lead">Arbeite wie im Laborprotokoll: Miss 100 mL der sauren Probe ab, fülle die Bürette mit 0,100 mol/L NaOH, rühre gleichmässig und gib die Lauge schrittweise zu. Notiere Volumen und pH. In Äquivalenznähe solltest du kleinere Portionen verwenden.</p>
+ <div class="grid">
+  <article class="card span-5">
+   <div class="kicker">Versuchsaufbau</div>
+   <div class="lab">
+    <div class="labgrid">
+     <div class="lab-art" aria-label="Schematische virtuelle Titrationsapparatur">
+      <div class="shelf"></div>
+      <div class="burette"><div class="burette-liquid" id="buretteLiquid"></div><div class="graduations">0<br>10<br>20<br>30<br>40<br>50</div></div>
+      <div class="tap"></div><div class="drip"></div>
+      <div class="beaker"><div class="beaker-liquid" id="beakerLiquid"></div></div>
+      <div class="beaker-label">100 mL Probe + BTB</div>
+      <div class="electrode"></div>
+      <div class="ph-meter"><small>pH-Meter</small><span id="meterPH">1.30</span></div>
+     </div>
+     <div class="lab-controls">
+      <div class="metric"><span class="muted">Zugegebenes NaOH-Volumen</span><strong><span id="volNow">0.00</span> mL</strong></div>
+      <div class="metric" style="margin-top:8px"><span class="muted">Berechneter pH-Wert</span><strong id="phNow">1.30</strong></div>
+      <label for="mode">Arbeitsmodus</label>
+      <select id="mode"><option value="guided">Geführt: Portionen passend wählen</option><option value="free">Frei: selbstständig titrieren</option></select>
+      <label for="addAmount">Zugabe pro Schritt: <span id="addLabel">1.0</span> mL</label>
+      <input id="addAmount" type="range" min=".1" max="5" step=".1" value="1">
+      <div class="control-buttons">
+       <button class="btn primary" id="addNaOH">NaOH zugeben</button>
+       <button class="btn secondary" id="suggest">Sinnvolle Portion vorschlagen</button>
+       <button class="btn warning" id="resetLab">Neu starten</button>
+      </div>
+      <p class="hint" id="guidance">Beginne mit Portionen von 1 mL. Wenn der pH stark steigt, verkleinere die Zugabe.</p>
+      <div class="callout"><strong>Sicherheitsgedanke:</strong> Im realen Versuch sind Schutzbrille und sorgfältiger Umgang mit Natronlauge erforderlich. Diese Simulation ersetzt keine Labor-Sicherheitsanweisung.</div>
+     </div>
+    </div>
+   </div>
+   <div class="grid" style="margin-top:12px">
+    <div class="span-6 metric"><span class="muted">Probevolumen</span><strong>100.0 mL</strong></div>
+    <div class="span-6 metric"><span class="muted">NaOH-Konzentration</span><strong>0.100 mol/L</strong></div>
+   </div>
+   <p class="hint">Modellannahme: Die virtuelle Probe enthält 0,0500 mol/L HCl. Dieser Wert ist für die Simulation gewählt; im echten Versuch soll er aus den Messdaten bestimmt werden.</p>
+  </article>
+  <article class="card span-7">
+   <div class="kicker">Messdaten & Titrationskurve</div>
+   <div class="graph-wrap"><svg id="curve" viewBox="0 0 640 360" role="img" aria-label="Titrationskurve pH gegen zugegebenes NaOH-Volumen"></svg></div>
+   <p class="hint">Die Kurve wird nach jedem Messschritt aktualisiert. Der Äquivalenzpunkt wird nicht automatisch markiert: Bestimme ihn aus dem steilen Kurvenabschnitt und vergleiche danach mit der Auswertung.</p>
+   <div class="control-buttons">
+    <button class="btn primary" id="revealEP">Äquivalenzpunkt auswerten</button>
+    <button class="btn secondary" id="downloadCSV">Messdaten als CSV speichern</button>
+   </div>
+   <div id="epResult" class="callout" style="display:none;margin:10px 0"></div>
+   <h3 style="margin-top:18px">Messwerttabelle</h3>
+   <div class="table-scroll"><table><thead><tr><th>Nr.</th><th>V(NaOH) / mL</th><th>pH</th><th>BTB-Farbe</th></tr></thead><tbody id="dataRows"><tr><td colspan="4" class="muted">Noch keine Zugabe erfolgt.</td></tr></tbody></table></div>
+  </article>
+  <article class="card span-12">
+   <h3>Auswertung wie im Protokoll</h3>
+   <div class="grid">
+    <div class="span-4">
+     <p><strong>1. Äquivalenzbedingung</strong></p>
+     <div class="equation">n(H₃O⁺) = n(OH⁻)</div>
+     <p class="muted">Für HCl und NaOH gilt das Stoffmengenverhältnis 1 : 1.</p>
+    </div>
+    <div class="span-4">
+     <p><strong>2. Stoffmenge berechnen</strong></p>
+     <div class="equation">n = c · V</div>
+     <p class="muted">Am Äquivalenzpunkt entspricht n(HCl) der zugegebenen Stoffmenge NaOH.</p>
+    </div>
+    <div class="span-4">
+     <p><strong>3. Konzentration bestimmen</strong></p>
+     <div class="equation">c(HCl) = c(NaOH) · V(NaOH) / V(Probe)</div>
+     <p class="muted">Volumina in derselben Einheit einsetzen.</p>
+    </div>
+   </div>
+   <div class="callout"><strong>Denke daran:</strong> Bei starker Säure und starker Base liegt der Äquivalenzpunkt bei etwa pH 7. Na⁺ und Cl⁻ sind Zuschauerionen; sie reagieren nicht weiter mit Wasser in relevantem Ausmass.</div>
+  </article>
+ </div>
+</section>
+
+<section class="panel" id="transfer">
+ <h2>3. Transfer: Von der Säure-Base- zur Vitamin-C-Redox-Titration</h2>
+ <p class="lead">Die folgenden sechs Fragen bereiten dich auf das nächste Experiment vor. Du musst die Redoxreaktion noch nicht kennen: Im Mittelpunkt stehen die Denkweisen, die du aus der heutigen Titration übertragen kannst. Beantworte jede Frage und prüfe deine Antwort direkt.</p>
+ <div class="card">
+  <div class="pills"><span class="pill">6 Fragen</span><span class="pill">Sofortiges Feedback</span><span class="pill">Hinweise verfügbar</span></div>
+  <div id="quiz"></div>
+  <div class="control-buttons"><button class="btn primary" id="scoreQuiz">Stand zusammenfassen</button><button class="btn secondary" id="resetQuiz">Quiz zurücksetzen</button></div>
+  <div id="quizScore" class="callout" style="display:none"></div>
+ </div>
+ <div class="card" style="margin-top:16px">
+  <h3>Spickzettel: die beiden Titrationen im Vergleich</h3>
+  <div class="table-scroll" style="max-height:none">
+   <table><thead><tr><th>Aspekt</th><th>Säure-Base-Titration</th><th>Vitamin-C-Redox-Titration</th></tr></thead><tbody>
+    <tr><td>Reaktion</td><td>H₃O⁺ + OH⁻ → 2 H₂O</td><td>Vitamin C wird oxidiert; I₂ wird reduziert.</td></tr>
+    <tr><td>Analyt</td><td>Salzsäure in der Probe</td><td>Vitamin C in der Probe</td></tr>
+    <tr><td>Äquivalenz / Endpunkt</td><td>Aus dem steilen pH-Sprung der Kurve; Indikator passend zum Umschlagbereich.</td><td>Stärke-Iod-Komplex wird dauerhaft dunkelblau/violett, wenn Iod im Überschuss bleibt.</td></tr>
+    <tr><td>Stöchiometrie</td><td>HCl : NaOH = 1 : 1</td><td>Nach der Anleitung: n(Vitamin C) = 3 · n(IO₃⁻).</td></tr>
+    <tr><td>Gemeinsamkeit</td><td colspan="2">Bekannte Reagenzkonzentration, schrittweise Zugabe, Erkennen des Endpunkts und stöchiometrische Berechnung der unbekannten Stoffmenge.</td></tr>
+   </tbody></table>
+  </div>
+  <p class="hint">Bei der Vitamin-C-Methode erzeugt Iodat in saurer Lösung aus Iodid Iod: IO₃⁻ + 5 I⁻ + 6 H₃O⁺ → 3 I₂ + 9 H₂O. Ein Vitamin-C-Molekül reagiert mit einem I₂-Molekül. Die Anleitung gibt daraus das Verhältnis n(Vitamin C) = 3 · n(IO₃⁻) an.</p>
+ </div>
+</section>
+</main>
+<footer>Interaktive Lernsimulation · Rechenwerte und Apparatur sind modellhaft. Massgeblich für den realen Versuch sind eure Versuchsanleitung und die Sicherheitsregeln des Labors.</footer>
+<script>
+const $ = id => document.getElementById(id);
+const tabs = [...document.querySelectorAll('nav button[data-tab]')];
+tabs.forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
+function showTab(id){tabs.forEach(b=>b.classList.toggle('active',b.dataset.tab===id));document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id===id));if(id==='lab')drawGraph();}
+$('goLab').addEventListener('click',()=>showTab('lab'));
+const demoPH=$('demoPH');
+function indicatorColor(ph){
+ if(ph<6.0)return {name:'Gelb',color:'#e6d76b',explain:'Die Lösung reagiert sauer.'};
+ if(ph<7.6){let t=(ph-6)/1.6;return {name:ph<6.8?'Gelbgrün':ph<7.2?'Grün':'Blaugrün',color:ph<6.8?'#cbdc70':ph<7.2?'#73c987':'#47b4a5',explain:'Der Indikator liegt im Umschlagbereich.'};}
+ return {name:'Blau',color:'#2584d8',explain:'Die Lösung reagiert alkalisch.'};
+}
+function updateDemo(){let ph=Number(demoPH.value),c=indicatorColor(ph);$('demoPHLabel').textContent=ph.toFixed(1);$('demoSwatch').style.background=c.color;$('demoColor').textContent=c.name;$('demoExplain').textContent=c.explain;}
+demoPH.addEventListener('input',updateDemo);updateDemo();
+$('checkIndicator').addEventListener('click',()=>{
+ let v=document.querySelector('input[name="indicatorChoice"]:checked')?.value,fb=$('indicatorFeedback');
+ fb.className='feedback show '+(v==='b'?'good':'bad');
+ fb.textContent=v==='b'?'Richtig. Der Umschlagbereich von Bromthymolblau liegt nahe pH 7 und passt damit gut zur Titration einer starken Säure mit einer starken Base.':'Noch nicht ganz. Entscheidend ist, dass der Umschlagbereich nahe beim Äquivalenzpunkt (ungefähr pH 7) liegt. Überlege, welcher Indikator dort seine Farbe ändert.';
+});
+
+const V0=0.100, cAcid=0.0500, cBase=0.100;
+let additions=[{v:0,ph:calcPH(0)}],totalV=0;
+function calcPH(vml){
+ const nA=cAcid*V0,nB=cBase*(vml/1000),vol=V0+vml/1000;
+ if(Math.abs(nA-nB)<1e-12)return 7;
+ if(nA>nB){let h=(nA-nB)/vol;return -Math.log10(h);}
+ let oh=(nB-nA)/vol;return 14+Math.log10(oh);
+}
+function fmtPH(p){return Math.max(0,Math.min(14,p)).toFixed(2)}
+function addStep(){
+ let step=Number($('addAmount').value);
+ if(totalV>=70){$('guidance').textContent='Die Simulation ist weit über den Äquivalenzpunkt hinaus. Du kannst neu starten oder die vorhandenen Daten auswerten.';return;}
+ totalV=Math.round((totalV+step)*1000)/1000;
+ let ph=calcPH(totalV);additions.push({v:totalV,ph});
+ updateLab();
+ if(ph>=11.5){$('guidance').textContent='Der pH-Wert liegt jetzt bei mindestens 11,5 – das ist der in der Versuchsanleitung genannte Endpunkt. Werte die Kurve aus.';$('addNaOH').disabled=true;}
+ else if(Math.abs(totalV-50)<3){$('guidance').textContent='Du bist nahe beim Äquivalenzpunkt. Verwende sehr kleine Portionen (z. B. 0,1–0,3 mL), damit du den pH-Sprung besser auflösen kannst.';}
+ else if(totalV<35){$('guidance').textContent='Der pH steigt zunächst langsam. Fahre in Schritten von etwa 1 mL fort und beobachte die Messwerte.';}
+ else {$('guidance').textContent='Der pH-Anstieg wird steiler. Verkleinere die Zugabe, um den Äquivalenzbereich nicht zu überspringen.';}
+}
+function updateLab(){
+ let ph=calcPH(totalV),col=indicatorColor(ph);
+ $('volNow').textContent=totalV.toFixed(2);$('meterPH').textContent=fmtPH(ph);$('phNow').textContent=fmtPH(ph);
+ $('beakerLiquid').style.background=col.color;$('buretteLiquid').style.height=Math.max(10,75-totalV*0.75)+'%';
+ $('addLabel').textContent=Number($('addAmount').value).toFixed(1);
+ $('dataRows').innerHTML=additions.map((a,i)=>{let c=indicatorColor(a.ph);return `<tr><td>${i}</td><td>${a.v.toFixed(2)}</td><td>${fmtPH(a.ph)}</td><td><span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:${c.color};margin-right:5px"></span>${c.name}</td></tr>`}).join('');
+ drawGraph();
+}
+$('addAmount').addEventListener('input',()=> $('addLabel').textContent=Number($('addAmount').value).toFixed(1));
+$('addNaOH').addEventListener('click',addStep);
+$('suggest').addEventListener('click',()=>{
+ let n=totalV<35?1:totalV<45?0.5:totalV<48?0.2:totalV<52?0.1:totalV<56?0.5:1;
+ $('addAmount').value=n;$('addLabel').textContent=n.toFixed(1);
+ $('guidance').textContent=`Vorschlag: ${n.toFixed(1)} mL. Der Schritt wird anhand des bisher zugegebenen Volumens gewählt; beobachte dennoch jeden pH-Messwert.`;
+});
+$('mode').addEventListener('change',()=>{
+ let guided=$('mode').value==='guided';$('suggest').style.display=guided?'inline-block':'none';
+ $('guidance').textContent=guided?'Geführter Modus: Nutze den Vorschlag, passe die Portion aber an die Messwerte an.':'Freier Modus: Du entscheidest selbst über die Zugabeschritte. Achte besonders auf den steilen Kurvenabschnitt.';
+});
+$('resetLab').addEventListener('click',()=>{
+ totalV=0;additions=[{v:0,ph:calcPH(0)}];$('addNaOH').disabled=false;$('epResult').style.display='none';
+ $('guidance').textContent='Beginne mit Portionen von 1 mL. Wenn der pH stark steigt, verkleinere die Zugabe.';updateLab();
+});
+function drawGraph(){
+ const svg=$('curve');if(!svg)return;
+ const W=640,H=360,L=54,R=18,T=18,B=48,gw=W-L-R,gh=H-T-B;
+ const x=v=>L+v/65*gw,y=p=>T+(14-p)/14*gh;
+ let s=[];
+ s.push(`<rect x="${L}" y="${T}" width="${gw}" height="${gh}" fill="#fbfdfe" stroke="#d9e5eb"/>`);
+ for(let p=0;p<=14;p+=2){s.push(`<line x1="${L}" y1="${y(p)}" x2="${W-R}" y2="${y(p)}" stroke="#e2ebf0"/>`);s.push(`<text x="${L-10}" y="${y(p)+4}" text-anchor="end" class="graph-label">${p}</text>`);}
+ for(let v=0;v<=60;v+=10){s.push(`<line x1="${x(v)}" y1="${T}" x2="${x(v)}" y2="${H-B}" stroke="#e2ebf0"/>`);s.push(`<text x="${x(v)}" y="${H-B+20}" text-anchor="middle" class="graph-label">${v}</text>`);}
+ s.push(`<text x="${L+gw/2}" y="${H-8}" text-anchor="middle" class="graph-label">Zugegebenes V(NaOH) / mL</text>`);
+ s.push(`<text x="15" y="${T+gh/2}" transform="rotate(-90 15 ${T+gh/2})" text-anchor="middle" class="graph-label">pH</text>`);
+ let points=[];
+ for(let v=0;v<=65;v+=.25)points.push(`${x(v).toFixed(1)},${y(calcPH(v)).toFixed(1)}`);
+ s.push(`<polyline points="${points.join(' ')}" fill="none" stroke="#c6d6df" stroke-width="2" stroke-dasharray="4 5"/>`);
+ if(additions.length>1){let pts=additions.map(a=>`${x(a.v)},${y(a.ph)}`).join(' ');s.push(`<polyline points="${pts}" fill="none" stroke="#087f8c" stroke-width="2.5"/>`);}
+ additions.forEach(a=>s.push(`<circle cx="${x(a.v)}" cy="${y(a.ph)}" r="4" fill="#1677a8" stroke="white" stroke-width="1.5"><title>${a.v.toFixed(2)} mL; pH ${fmtPH(a.ph)}</title></circle>`));
+ if($('epResult').style.display!=='none')s.push(`<line x1="${x(50)}" y1="${T}" x2="${x(50)}" y2="${H-B}" stroke="#b83a3a" stroke-width="2" stroke-dasharray="6 4"/>`);
+ svg.innerHTML=s.join('');
+}
+$('revealEP').addEventListener('click',()=>{
+ let closest=additions.reduce((a,b)=>Math.abs(b.v-50)<Math.abs(a.v-50)?b:a,additions[0]);
+ $('epResult').style.display='block';
+ $('epResult').innerHTML=`<strong>Auswertung:</strong> Der Äquivalenzpunkt der Modellprobe liegt bei etwa <strong>50,0 mL NaOH</strong> und pH 7.0. Vergleiche dies mit deinem steilsten Kurvenabschnitt. Dein nächster Messpunkt zum theoretischen Äquivalenzvolumen: <strong>${closest.v.toFixed(2)} mL</strong> (pH ${fmtPH(closest.ph)}).<br><br>Berechnung: n(NaOH) = 0,100 mol/L · 0,0500 L = 0,00500 mol. Wegen des Verhältnisses 1:1 gilt n(HCl) = 0,00500 mol. Für 0,100 L Probe folgt c(HCl) = 0,0500 mol/L.`;
+ drawGraph();
+});
+$('downloadCSV').addEventListener('click',()=>{
+ let csv='Messpunkt;V_NaOH_mL;pH;BTB_Farbe\n'+additions.map((a,i)=>`${i};${a.v.toFixed(2).replace('.',',')};${fmtPH(a.ph).replace('.',',')};${indicatorColor(a.ph).name}`).join('\n');
+ const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='titrationsmessdaten.csv';a.click();URL.revokeObjectURL(url);
+});
+updateLab();
+
+const questions=[
+ {q:'1. Warum lässt sich die unbekannte HCl-Konzentration mit der Titration bestimmen?',hint:'Denke an die Stoffmenge, die du aus Konzentration und Volumen der Natronlauge berechnen kannst, und an den Äquivalenzpunkt.',opts:[
+  ['a','Weil der pH-Wert allein direkt die Stoffmenge der Säure angibt.'],
+  ['b','Am Äquivalenzpunkt sind H₃O⁺ und OH⁻ stöchiometrisch umgesetzt; aus c(NaOH) und V(NaOH) erhält man n(NaOH) und damit n(HCl).'],
+  ['c','Weil Na⁺ und Cl⁻ miteinander reagieren und einen Niederschlag bilden.']],correct:'b',why:'Richtig: n = c · V. Bei HCl und NaOH ist das Stoffmengenverhältnis 1:1, daher lässt sich n(HCl) aus der verbrauchten Natronlauge bestimmen.'},
+ {q:'2. Was zeigt der steile pH-Sprung und wozu dient der Indikator?',hint:'Der pH ändert sich in Äquivalenznähe besonders stark. Der Indikator muss dort seinen Umschlagbereich haben.',opts:[
+  ['a','Der pH-Sprung liegt nahe dem Äquivalenzpunkt; ein geeigneter Indikator macht den Endpunkt durch Farbänderung sichtbar.'],
+  ['b','Der pH-Sprung zeigt, dass die Natronlauge plötzlich eine höhere Konzentration bekommt.'],
+  ['c','Ein Indikator beschleunigt die Neutralisation und wird vollständig verbraucht.']],correct:'a',why:'Genau. Der Indikator dient zur visuellen Endpunkterkennung; sein Umschlagbereich sollte möglichst zum steilen pH-Bereich passen.'},
+ {q:'3. Du sollst in der nächsten Lektion die Vitamin-C-Menge einer Probe bestimmen. Welche Informationen brauchst du grundsätzlich dafür?',hint:'Vergleiche mit der heutigen Titration: Welche Angaben waren bekannt, welche Grösse war unbekannt, und was hast du am Endpunkt abgelesen?',opts:[
+  ['a','Nur die Farbe der Probe vor Beginn des Experiments.'],
+  ['b','Die Konzentration des zugegebenen Reagenzes, das bis zum Endpunkt verbrauchte Volumen und das Stoffmengenverhältnis der Reaktion.'],
+  ['c','Nur das Gesamtvolumen aller Flüssigkeiten im Becherglas.']],correct:'b',why:'Richtig. Wie bei der Säure-Base-Titration brauchst du die Konzentration und das verbrauchte Volumen des Reagenzes. Zusätzlich musst du wissen, in welchem Stoffmengenverhältnis es mit Vitamin C reagiert.'},
+ {q:'4. Bei der heutigen Titration erkennst du den Endpunkt über den pH-Wert bzw. einen Indikator. Muss eine Titration immer über den pH-Wert verfolgt werden?',hint:'Überlege, welche andere beobachtbare Veränderung während einer chemischen Reaktion auftreten könnte.',opts:[
+  ['a','Ja. Jede Titration ist eine Säure-Base-Reaktion.'],
+  ['b','Nein. Je nach Reaktion kann der Endpunkt auch durch eine deutliche Farbänderung erkennbar sein.'],
+  ['c','Nein. Bei anderen Titrationen braucht man grundsätzlich keinen Endpunkt.']],correct:'b',why:'Genau. Eine Titration muss nicht über den pH-Wert verfolgt werden. Bei der kommenden Vitamin-C-Untersuchung wirst du ein Farbsignal nutzen, um den Endpunkt zu erkennen.'},
+ {q:'5. Warum solltest du bei einer Titration die Lösung gegen Ende nur noch tropfenweise zugeben?',hint:'Vergleiche die Messpunkte deiner heutigen Kurve: Was passiert, wenn du den Bereich mit der starken Veränderung mit einem grossen Schritt überspringst?',opts:[
+  ['a','Damit der Endpunkt nicht überschritten wird und das verbrauchte Volumen möglichst genau bestimmt werden kann.'],
+  ['b','Damit die Reaktion erst bei der letzten Zugabe beginnt.'],
+  ['c','Damit die Konzentration des Reagenzes im Verlauf der Titration zunimmt.']],correct:'a',why:'Richtig. Wird zu viel Reagenz auf einmal zugegeben, kann der Endpunkt überschritten werden. Das abgelesene Volumen ist dann zu gross und die berechnete Stoffmenge kann verfälscht sein.'},
+ {q:'6. Reicht es, bei der nächsten Titration einfach das verbrauchte Volumen abzulesen, um die Vitamin-C-Menge zu berechnen?',hint:'Bei der HCl-Titration konntest du das Volumen erst mithilfe der Konzentration und der Reaktionsgleichung in eine Stoffmenge umrechnen.',opts:[
+  ['a','Ja. Ein bestimmtes Volumen entspricht bei jeder Titration derselben Stoffmenge des gesuchten Stoffes.'],
+  ['b','Nein. Aus Konzentration und Volumen berechnet man zunächst die Stoffmenge des zugegebenen Reagenzes; die Reaktionsgleichung liefert dann das Verhältnis zum Vitamin C.'],
+  ['c','Ja. Die Farbe am Endpunkt gibt die Vitamin-C-Menge direkt in Gramm an.']],correct:'b',why:'Richtig. Das Volumen allein genügt nicht. Du berechnest zuerst n = c · V für das Reagenz und nutzt danach die stöchiometrischen Koeffizienten der Reaktionsgleichung, um die Vitamin-C-Menge zu bestimmen.'}
+]
+let quizState=questions.map(()=>({answered:false,correct:false}));
+function renderQuiz(){
+ $('quiz').innerHTML=questions.map((q,i)=>`<div class="question" data-q="${i}"><div class="kicker">Transferfrage ${i+1} von 6</div><h3>${q.q}</h3><div class="options">${q.opts.map(o=>`<label class="option"><input type="radio" name="q${i}" value="${o[0]}"><span>${o[1]}</span></label>`).join('')}</div><div class="control-buttons"><button class="btn secondary checkQ" data-i="${i}">Antwort prüfen</button><button class="btn" style="background:#f0f4f7" data-hint="${i}">Hinweis anzeigen</button></div><div class="feedback" id="fb${i}" role="status"></div><div class="hint" id="hint${i}" style="display:none">${q.hint}</div></div>`).join('');
+ document.querySelectorAll('.checkQ').forEach(b=>b.addEventListener('click',()=>checkQuestion(Number(b.dataset.i))));
+ document.querySelectorAll('[data-hint]').forEach(b=>b.addEventListener('click',()=>{let h=$('hint'+b.dataset.hint);h.style.display=h.style.display==='none'?'block':'none';}));
+}
+function checkQuestion(i){
+ let chosen=document.querySelector(`input[name="q${i}"]:checked`)?.value,fb=$('fb'+i);
+ if(!chosen){fb.className='feedback show bad';fb.textContent='Bitte wähle zuerst eine Antwort aus.';return;}
+ let q=questions[i],ok=chosen===q.correct;quizState[i]={answered:true,correct:ok};
+ fb.className='feedback show '+(ok?'good':'bad');fb.textContent=(ok?'Richtig. ':'Noch nicht richtig. ')+q.why;
+}
+$('scoreQuiz').addEventListener('click',()=>{
+ let done=quizState.filter(x=>x.answered).length,correct=quizState.filter(x=>x.correct).length;
+ $('quizScore').style.display='block';$('quizScore').innerHTML=`<strong>Dein Zwischenstand: ${correct} von 6 richtig geprüft.</strong><br>${done} von 6 Fragen wurden bereits kontrolliert. ${done<6?'Bearbeite die übrigen Fragen und nutze bei Bedarf die Hinweise.':correct===6?'Sehr gut – du hast die zentralen Unterschiede und die stöchiometrische Auswertung verstanden.':'Lies die Rückmeldungen nochmals und versuche die Fragen erneut.'}`;
+});
+$('resetQuiz').addEventListener('click',()=>{quizState=questions.map(()=>({answered:false,correct:false}));$('quizScore').style.display='none';renderQuiz();});
+renderQuiz();
+</script>
+</body>
+</html>
